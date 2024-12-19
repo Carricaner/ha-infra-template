@@ -3,7 +3,7 @@ resource "aws_security_group" "alb_sg" {
   vpc_id = aws_vpc.ha_template_vpc.id
 
   tags = {
-    Name = "${local.name_prefix}_alb_sg"
+    Name         = "${local.name_prefix}_alb_sg"
     project_name = var.project_name
   }
 }
@@ -38,7 +38,7 @@ resource "aws_security_group" "ec2_sg" {
   vpc_id = aws_vpc.ha_template_vpc.id
 
   tags = {
-    Name = "${local.name_prefix}_ec2_sg"
+    Name         = "${local.name_prefix}_ec2_sg"
     project_name = var.project_name
   }
 }
@@ -57,3 +57,78 @@ resource "aws_vpc_security_group_egress_rule" "ec2_sg_outbound_rule" {
   cidr_ipv4   = "0.0.0.0/0"
 }
 
+resource "aws_lb" "alb" {
+  name               = replace("${local.name_prefix}_alb", "_", "-")
+  load_balancer_type = "application"
+  internal           = false
+  security_groups = [
+    aws_security_group.alb_sg.id
+  ]
+  subnets = aws_subnet.public_subnet[*].id
+  depends_on = [
+    aws_internet_gateway.internet_gateway
+  ]
+}
+
+resource "aws_lb_target_group" "alb_target_group" {
+  name     = replace("${local.name_prefix}_alb_tg", "_", "-")
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.ha_template_vpc.id
+  tags = {
+    Name = "${local.name_prefix}_tg"
+  }
+}
+
+resource "aws_lb_listener" "alb_forward_listener" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
+  }
+  tags = {
+    Name = "${local.name_prefix}_alb_forward_listener"
+  }
+}
+
+resource "aws_launch_template" "ec2_launch_template" {
+  name          = "${local.name_prefix}_ec2_launch_template"
+  image_id      = local.ec2.ami_id
+  instance_type = "t2.micro"
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups = [
+      aws_security_group.ec2_sg.id
+    ]
+  }
+
+  user_data = filebase64("userdata.sh")
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${local.name_prefix}_ec2_instance"
+    }
+  }
+}
+
+resource "aws_autoscaling_group" "ec2_auto_scaling_group" {
+  name             = "${local.name_prefix}_ec2_auto_scaling_group"
+  desired_capacity = 1
+  min_size         = 1
+  max_size         = 3
+  target_group_arns = [
+    aws_lb_target_group.alb_target_group.arn
+  ]
+  vpc_zone_identifier = aws_subnet.private_subnet[*].id
+
+  launch_template {
+    id      = aws_launch_template.ec2_launch_template.id
+    version = "$Latest"
+  }
+
+  health_check_type = "EC2"
+}
