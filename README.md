@@ -1,5 +1,4 @@
 ## Commands
-
 - apply
     ```
     terraform apply \
@@ -7,28 +6,26 @@
     -var-file=dev.tfvars
     ```
 
+## TODOs
+- [] Use ELB's health check
+- [] Create one NAT Gateway for each AZ
+- [] Make it possible to dynamically adjust the number of AZ.
 
 
 ## Notes
+-  It’s recommended to deploy a NAT Gateway in each AZ where you have private subnets, which avoiding cross-AZ data transfer fee and NAT Gatway outage.
 
-- AZs output
+- Relationships among ALBs, listners & target groups
+    ```mermaid
+    flowchart TD
+    ALB
+    L1{{Listener 1}}
+    L2{{Listener 2}}
+    L3{{Listener 3}}
+    TG1((Target Group 1))
+    TG2((Target Group 2))
 
-    ```json
-    AZs = {
-            group_names = [
-                "ap-northeast-1",
-            ]
-            id          = "ap-northeast-1"
-            names       = [
-                "ap-northeast-1a",
-                "ap-northeast-1c",
-                "ap-northeast-1d",
-            ]
-            state       = "available"
-            zone_ids    = [
-                "apne1-az4",
-                "apne1-az1",
-                "apne1-az2",
-            ]
-        }
+    ALB --> L1 --> TG1
+    ALB --> L2 --> TG2
+    ALB --> L3 --> TG2
     ```

@@ -75,6 +75,18 @@ resource "aws_lb_target_group" "alb_target_group" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.ha_template_vpc.id
+
+  health_check {
+    enabled             = true
+    path                = "/"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+    matcher             = "200-299"
+  }
+
   tags = {
     Name = "${local.name_prefix}_tg"
   }
@@ -130,5 +142,6 @@ resource "aws_autoscaling_group" "ec2_auto_scaling_group" {
     version = "$Latest"
   }
 
-  health_check_type = "EC2"
+  health_check_type         = "ELB"
+  health_check_grace_period = 300
 }
