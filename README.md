@@ -7,9 +7,8 @@
     ```
 
 ## TODOs
-- [] Use ELB's health check
-- [] Create one NAT Gateway for each AZ
-- [] Make it possible to dynamically adjust the number of AZ.
+- [V] Use ELB's health check
+- [V] Create one NAT Gateway for each AZ
 
 
 ## Notes
@@ -25,7 +24,11 @@
     TG1((Target Group 1))
     TG2((Target Group 2))
 
-    ALB --> L1 --> TG1
-    ALB --> L2 --> TG2
-    ALB --> L3 --> TG2
+    ALB -->|attached with| L1
+    ALB -->|attached with| L2
+    ALB -->|attached with| L3
+
+    L1 -->|health check or send| TG1
+    L2 -->|health check or send| TG2
+    L3 -->|health check or send| TG2
     ```

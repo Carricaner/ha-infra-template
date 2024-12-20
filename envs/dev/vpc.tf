@@ -47,12 +47,13 @@ resource "aws_route_table" "public_subnet_route_table" {
 }
 
 resource "aws_route_table_association" "public_subnet_association" {
-  route_table_id = aws_route_table.public_subnet_route_table.id
   count          = length(local.available_zones)
+  route_table_id = aws_route_table.public_subnet_route_table.id
   subnet_id      = element(aws_subnet.public_subnet[*].id, count.index)
 }
 
 resource "aws_eip" "eip" {
+  count  = length(local.available_zones)
   domain = "vpc"
   depends_on = [
     aws_internet_gateway.internet_gateway
@@ -60,32 +61,34 @@ resource "aws_eip" "eip" {
 }
 
 resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.eip.id
-  subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
+  count         = length(local.available_zones)
+  allocation_id = element(aws_eip.eip[*].id, count.index)
+  subnet_id     = element(aws_subnet.public_subnet[*].id, count.index)
   depends_on = [
     aws_internet_gateway.internet_gateway
   ]
   tags = {
-    Name = "${local.name_prefix}_nat_gateway"
+    Name = "${local.name_prefix}_nat_gateway_${count.index + 1}"
   }
 }
 
 resource "aws_route_table" "private_subnet_route_table" {
+  count  = length(local.available_zones)
   vpc_id = aws_vpc.ha_template_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway.id
+    gateway_id = element(aws_nat_gateway.nat_gateway[*].id, count.index)
   }
   depends_on = [
     aws_nat_gateway.nat_gateway
   ]
   tags = {
-    Name = "${local.name_prefix}_private_subnet_route_table"
+    Name = "${local.name_prefix}_private_subnet_route_table_${count.index + 1}"
   }
 }
 
 resource "aws_route_table_association" "private_subnet_association" {
-  route_table_id = aws_route_table.private_subnet_route_table.id
   count          = length(local.available_zones)
+  route_table_id = element(aws_route_table.private_subnet_route_table[*].id, count.index)
   subnet_id      = element(aws_subnet.private_subnet[*].id, count.index)
 }
