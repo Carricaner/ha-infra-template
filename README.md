@@ -1,3 +1,14 @@
+# HA Infrastrucutre Template
+
+## Description
+
+This project makes it easy to launch a variety of AWS services to build a high-availability infrastructure. By utilizing VPC, EC2, ALB, and ASG, it ensures robust performance, scalability, and reliability.
+
+## Architecture
+
+<img src="https://the-general.s3.ap-northeast-1.amazonaws.com/project/ha-infra-template.svg" width="750" alt="HA Infra Template Architecture"/>
+
+
 ## Commands
 - apply
     ```
