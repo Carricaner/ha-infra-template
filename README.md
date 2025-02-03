@@ -6,7 +6,7 @@ This project makes it easy to launch a variety of AWS services to build a high-a
 
 ## Architecture
 
-<img src="https://the-general.s3.ap-northeast-1.amazonaws.com/project/ha-infra-template.svg" width="750" alt="HA Infra Template Architecture"/>
+<img src="https://the-general.s3.ap-northeast-1.amazonaws.com/project/ha-infra-template.svg" width="850" alt="HA Infra Template Architecture"/>
 
 
 ## Commands
