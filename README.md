@@ -8,21 +8,68 @@ This project makes it easy to launch a variety of AWS services to build a high-a
 
 <img src="https://the-general.s3.ap-northeast-1.amazonaws.com/project/ha-infra-template.svg" width="850" alt="HA Infra Template Architecture"/>
 
+## Prerequisites
 
-## Commands
-- apply
+- Terraform
+- AWS CLI
+
+## Steps
+1. Configure AWS CLI and make sure the IAM user has corresponding rights
+    
+    ```shell
+    aws configure
     ```
+
+2. Log in for Terraform
+    
+    ```shell
+    terraform login
+    ```
+
+3. Configure the Terraform Cloud under `./envs/dev/terraform.tf`, and the format is like:
+    
+    ```terraform
+    terraform {
+        cloud {
+            organization = <the-org>
+
+            workspaces {
+                project = <the-project>
+                name    = <name>
+            }
+        }
+
+        required_providers {
+            aws = {
+                source  = "hashicorp/aws"
+                version = "~> 5.80"
+            }
+        }
+    }
+    ```
+
+4. Initialize Terraform
+    
+    ```shell
+    terraform init
+    ```
+
+5. Plan & apply the infrastructure
+    
+    ```shell
+    make apply
+    ```
+
+## Notes
+- After moving into the env folder, apply it with a command like
+    
+    ```bash
     terraform apply \
     -var-file=../../shared/shared-variables.tfvars \
     -var-file=dev.tfvars
     ```
+    - The order of files matters, since the latter will overwrite the former's values.
 
-## TODOs
-- [V] Use ELB's health check
-- [V] Create one NAT Gateway for each AZ
-
-
-## Notes
 -  It’s recommended to deploy a NAT Gateway in each AZ where you have private subnets, which avoiding cross-AZ data transfer fee and NAT Gatway outage.
 
 - Relationships among ALBs, listners & target groups
@@ -43,3 +90,8 @@ This project makes it easy to launch a variety of AWS services to build a high-a
     L2 -->|health check or send| TG2
     L3 -->|health check or send| TG2
     ```
+
+## Future Work
+- to adjust the number of AZs dynamically
+- to adjust the desired, minimum & maximum number of instances under ASG dynamically.
+- to tell if the cluster of instances is healthy or not by AWS CloudWatch, which is much more grainular.
