@@ -94,4 +94,4 @@ This project makes it easy to launch a variety of AWS services to build a high-a
 ## Future Work
 - to adjust the number of AZs dynamically
 - to adjust the desired, minimum & maximum number of instances under ASG dynamically.
-- to tell if the cluster of instances is healthy or not by AWS CloudWatch, which is much more grainular.
+- to scale the instances based on CloudWatch alarm's metrics, like average CPU or other custom metrics.
