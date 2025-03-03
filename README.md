@@ -70,7 +70,7 @@ This project makes it easy to launch a variety of AWS services to build a high-a
     ```
     - The order of files matters, since the latter will overwrite the former's values.
 
--  It’s recommended to deploy a NAT Gateway in each AZ where you have private subnets, which avoiding cross-AZ data transfer fee and NAT Gatway outage.
+-  It’s recommended to deploy a NAT Gateway in each AZ where you have private subnets, which avoiding cross-AZ data transfer fee.
 
 - Relationships among ALBs, listners & target groups
     ```mermaid
