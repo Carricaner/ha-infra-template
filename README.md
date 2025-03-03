@@ -92,6 +92,6 @@ This project makes it easy to launch a variety of AWS services to build a high-a
     ```
 
 ## Future Work
-- to adjust the number of AZs dynamically
-- to adjust the desired, minimum & maximum number of instances under ASG dynamically.
-- to scale the instances based on CloudWatch alarm's metrics, like average CPU or other custom metrics.
+- Adjust the number of AZs dynamically
+- Adjust the desired, minimum & maximum number of instances under ASG dynamically.
+- Configure scaling policies for ASD and scale the instances based on CloudWatch alarm's metrics, like average CPU or other custom metrics.
